@@ -1,0 +1,50 @@
+<configuration>
+    <!-- Console appender that produce log entry in JSON format   -->
+    <appender name="JSON-FORMAT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <mdc/>
+                <pattern>
+                    <pattern>
+                        {
+                        "timestamp": "%date{ISO8601}",
+                        "level": "%level",
+                        "logger": "%logger",
+                        "thread": "%thread",
+                        "actorSystem": "%X{akkaSource}",
+                        "msg": "%msg"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>50</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>70</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!--
+    Logging from tests are silenced by this appender. When there is a test failure
+    the captured logging events are flushed to the appenders defined for the
+    akka.actor.testkit.typed.internal.CapturingAppenderDelegate logger.
+    -->
+    <appender name="CapturingAppender" class="akka.actor.testkit.typed.internal.CapturingAppender" />
+
+    <!--
+    The appenders defined for this CapturingAppenderDelegate logger are used
+    when there is a test failure and all logging events from the test are
+    flushed to these appenders.
+    -->
+    <logger name="akka.actor.testkit.typed.internal.CapturingAppenderDelegate" >
+        <appender-ref ref="JSON-FORMAT"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CapturingAppender"/>
+    </root>
+</configuration>

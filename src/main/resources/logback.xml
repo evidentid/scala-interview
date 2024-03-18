@@ -1,0 +1,55 @@
+<configuration>
+    <!-- Console appender that produce log entry in JSON format   -->
+    <appender name="JSON-FORMAT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <mdc/>
+                <pattern>
+                    <pattern>
+                        {
+                        "timestamp": "%date{ISO8601}",
+                        "level": "%level",
+                        "logger": "%logger",
+                        "thread": "%thread",
+                        "actorSystem": "%X{akkaSource}",
+                        "msg": "%msg"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>50</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>70</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- https://doc.akka.io/docs/akka/current/logging.html#logback-configuration-->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- http://logback.qos.ch/manual/appenders.html#AsyncAppender -->
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="JSON-FORMAT" />
+    </appender>
+
+    <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <appender name="SENTRYASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="SENTRY" />
+    </appender>
+
+    <root level="${LOG_LEVEL:-INFO}" >
+        <appender-ref ref="ASYNC"/>
+        <appender-ref ref="SENTRYASYNC" />
+    </root>
+</configuration>

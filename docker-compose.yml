@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  postgres: # https://hub.docker.com/_/postgres
+    image: postgres:11-alpine
+    entrypoint: /opt/evidentid/bin/entrypoint.sh
+    command: -N 500
+    environment:
+      POSTGRES_USER_FILE: "/run/secrets/testbed_user"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/testbed_passwd"
+    ports:
+      - "5432" # docker-compose port postgres 5432
+    secrets:
+      - testbed_user
+      - testbed_passwd
+    volumes:
+      - ./src/it/resources/docker/bin/postgres:/opt/evidentid/bin
+
+secrets:
+  testbed_user:
+    file: src/it/resources/docker/testbed_default_user.txt
+  testbed_passwd:
+    file: src/it/resources/docker/testbed_default_passwd.txt

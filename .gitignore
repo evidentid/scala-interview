@@ -1,5 +1,16 @@
-*.class
-*.log
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+target/
+.idea/
+*.iml
+src/it/resources/docker/*_server.cert
+src/it/resources/docker/*_server.key
+src/it/resources/docker/*_trust_store
+hs_err_*.log
+core
+META-INF/
+.bsp
+.metals/
+.bloop/
+project/.bloop/
+project/metals.sbt
+project/project
+.DS_Store
